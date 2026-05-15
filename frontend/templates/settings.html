@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1 class="page-title">System Settings</h1>
+
+<div class="card" style="max-width: 800px;">
+    <form action="/settings" method="POST">
+        <h3 style="margin-bottom: 15px; color: var(--accent);">Classroom Settings</h3>
+
+        <div class="form-group">
+            <label>Default Lecture Duration</label>
+            <div style="display: flex; gap: 20px;">
+                <label style="display: inline;"><input type="radio" name="lecture_duration" value="3" {% if
+                        settings.lecture_duration=='3' %}checked{% endif %}> 3 Mins</label>
+                <label style="display: inline;"><input type="radio" name="lecture_duration" value="30" {% if
+                        settings.lecture_duration=='30' %}checked{% endif %}> 30 Mins</label>
+                <label style="display: inline;"><input type="radio" name="lecture_duration" value="45" {% if
+                        settings.lecture_duration=='45' %}checked{% endif %}> 45 Mins</label>
+                <label style="display: inline;"><input type="radio" name="lecture_duration" value="60" {% if
+                        settings.lecture_duration=='60' %}checked{% endif %}> 60 Mins</label>
+                <label style="display: inline;"><input type="radio" name="lecture_duration" value="90" {% if
+                        settings.lecture_duration=='90' %}checked{% endif %}> 90 Mins</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Attendance Minimum Threshold (%)</label>
+            <input type="range" name="attendance_threshold" min="50" max="90"
+                value="{{ settings.attendance_threshold }}"
+                oninput="document.getElementById('thresh-val').innerText = this.value + '%'">
+            <span id="thresh-val" style="color: var(--accent); font-weight: bold;">{{ settings.attendance_threshold
+                }}%</span>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Save Settings</button>
+    </form>
+</div>
+{% endblock %}

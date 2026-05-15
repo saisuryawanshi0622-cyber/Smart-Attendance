@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 class="page-title">All Students</h1>
+    <a href="/register" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Student</a>
+</div>
+
+<div class="card" style="margin-bottom: 20px; padding: 15px;">
+    <h3>Bulk Import Students</h3>
+    <form action="/bulk_import" method="POST" enctype="multipart/form-data" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">1. Excel/CSV File (Names & Rolls):</label>
+            <input type="file" name="csv_file" accept=".csv, .xlsx" required style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">2. Photos (PDF file containing student photos):</label>
+            <input type="file" name="pdf_file" accept=".pdf" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <small style="display: block; margin-top: 5px; color: #666;">Photos will be assigned in order (1st photo to 1st student).</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="height: 40px;">Import Data</button>
+    </form>
+    <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+    <form action="/clear_students" method="POST" onsubmit="return confirm('Are you sure you want to clear all student data? This cannot be undone.');">
+        <button type="submit" class="btn" style="background-color: #dc3545; color: white;">Clear All Student Data</button>
+    </form>
+</div>
+
+<div class="card">
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Enrolled Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>
+                        {% if student.photo_path %}
+                            <img src="/{{ student.photo_path }}" alt="Photo" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #555;"></div>
+                        {% endif %}
+                    </td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.roll_number }}</td>
+                    <td>{{ student.created_date.split(' ')[0] if student.created_date else '' }}</td>
+                    <td>
+                        <a href="/student/{{ student.id }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">View Profile</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No students registered yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

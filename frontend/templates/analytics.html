@@ -1,0 +1,97 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1 class="page-title">Analytics & Insights</h1>
+
+<div class="grid-2">
+    <!-- Line Chart: Daily Attendance -->
+    <div class="card">
+        <h3>Daily Attendance Trend</h3>
+        <canvas id="trendChart"></canvas>
+    </div>
+    
+    <!-- Pie Chart: Present vs Absent -->
+    <div class="card">
+        <h3>Today's Overview</h3>
+        <canvas id="pieChart"></canvas>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Bar Chart: Subject Comparison -->
+    <div class="card">
+        <h3>Subject-wise Attendance</h3>
+        <canvas id="subjectChart"></canvas>
+    </div>
+    
+    <!-- Bar Chart: Behaviour Issues -->
+    <div class="card">
+        <h3>Common Behaviour Issues</h3>
+        <canvas id="behaviourChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    Chart.defaults.color = '#94a3b8';
+    
+    // Trend Chart
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            datasets: [{
+                label: 'Attendance %',
+                data: [85, 90, 78, 88, 92],
+                borderColor: '#00d4ff',
+                tension: 0.3
+            }]
+        },
+        options: { scales: { y: { min: 0, max: 100, grid: { color: '#1e293b' } }, x: { grid: { color: '#1e293b' } } } }
+    });
+
+    // Pie Chart
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Late', 'Absent'],
+            datasets: [{
+                data: [60, 15, 25],
+                backgroundColor: ['#2ed573', '#ffa502', '#ff4757'],
+                borderWidth: 0
+            }]
+        }
+    });
+
+    // Subject Chart
+    new Chart(document.getElementById('subjectChart'), {
+        type: 'bar',
+        data: {
+            labels: ['General', 'Seminar'],
+            datasets: [{
+                label: 'Avg Attendance %',
+                data: [95, 88],
+                backgroundColor: '#00d4ff',
+                borderRadius: 5
+            }]
+        },
+        options: { scales: { y: { min: 0, max: 100, grid: { color: '#1e293b' } }, x: { grid: { display: false } } } }
+    });
+
+    // Behaviour Chart
+    new Chart(document.getElementById('behaviourChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Sleeping', 'Talking', 'Phone', 'Seat Change'],
+            datasets: [{
+                label: 'Incidents Count',
+                data: [12, 19, 5, 8],
+                backgroundColor: '#ff4757',
+                borderRadius: 5
+            }]
+        },
+        options: { scales: { y: { grid: { color: '#1e293b' } }, x: { grid: { display: false } } } }
+    });
+</script>
+{% endblock %}

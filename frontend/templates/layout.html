@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Classroom Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-brain"></i> Smart Attendance
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="{{ 'active' if request.endpoint == 'index' else '' }}"><i class="fas fa-video"></i>
+                    Live Monitor</a></li>
+            <li><a href="/dashboard" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}"><i
+                        class="fas fa-chart-bar"></i> Dashboard</a></li>
+            <li><a href="/students" class="{{ 'active' if request.endpoint == 'students' else '' }}"><i
+                        class="fas fa-users"></i> Students</a></li>
+            <li><a href="/analytics" class="{{ 'active' if request.endpoint == 'analytics' else '' }}"><i
+                        class="fas fa-chart-pie"></i> Analytics</a></li>
+            <li><a href="/settings" class="{{ 'active' if request.endpoint == 'settings' else '' }}"><i
+                        class="fas fa-cog"></i> Settings</a></li>
+        </ul>
+
+        <div class="user-info" style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border);">
+            <div style="font-size: 14px; color: var(--accent); margin-bottom: 10px;">
+                <i class="fas fa-user-circle"></i> {{ session.get('username', 'User') }}
+            </div>
+            <a href="/logout" style="color: var(--alert); text-decoration: none; font-size: 14px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages" style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

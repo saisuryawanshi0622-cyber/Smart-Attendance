@@ -1,0 +1,10 @@
+flask
+gunicorn
+opencv-contrib-python-headless
+mediapipe
+numpy
+pyttsx3
+reportlab
+openpyxl
+twilio
+Pillow

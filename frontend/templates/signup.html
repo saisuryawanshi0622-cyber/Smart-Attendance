@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SmartClass</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: var(--bg-color);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h2 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .login-header p {
+            color: var(--text-secondary);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .error-msg {
+            color: var(--alert);
+            background: rgba(255, 71, 87, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .success-msg {
+            color: var(--success);
+            background: rgba(46, 213, 115, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <h2>SmartClass</h2>
+            <p>Teacher Registration</p>
+        </div>
+        
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+        
+        {% if success %}
+            <div class="success-msg">{{ success }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Choose a username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" placeholder="Repeat password" required>
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px; margin-top: 10px;">Create Account</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="color: var(--text-secondary); font-size: 14px;">
+                Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent); text-decoration: none;">Login here</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div style="display: flex; gap: 20px;">
+    <!-- Profile Card -->
+    <div class="card" style="flex: 1;">
+        <div style="text-align: center;">
+            {% if student.photo_path %}
+            <img src="/{{ student.photo_path }}" alt="Photo"
+                style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--border);">
+            {% else %}
+            <div style="width: 150px; height: 150px; border-radius: 50%; background: #555; margin: 0 auto;"></div>
+            {% endif %}
+            <h2 style="margin-top: 15px;">{{ student.name }}</h2>
+            <p style="color: var(--text-secondary);">Roll No: {{ student.roll_number }}</p>
+        </div>
+
+        <div style="margin-top: 30px;">
+
+            <p><strong>Enrolled:</strong> {{ student.created_date.split(' ')[0] if student.created_date else '' }}</p>
+        </div>
+    </div>
+
+    <!-- Stats & Charts -->
+    <div style="flex: 2; display: flex; flex-direction: column; gap: 20px;">
+        <div class="card" style="display: flex; justify-content: space-around; text-align: center;">
+            <div>
+                <h3 style="color: var(--text-secondary);">Overall Attendance</h3>
+                <div style="font-size: 40px; font-weight: 700; color: var(--success);">85%</div>
+            </div>
+            <div>
+                <h3 style="color: var(--text-secondary);">Average Behaviour</h3>
+                <div style="font-size: 40px; font-weight: 700; color: var(--accent);">9.2/10</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Behaviour History</h3>
+            <canvas id="behaviourChart" height="100"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('behaviourChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            datasets: [{
+                label: 'Behaviour Score',
+                data: [10, 8, 9, 10, 7],
+                borderColor: '#00d4ff',
+                backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                y: { min: 0, max: 10, grid: { color: '#1e293b' } },
+                x: { grid: { color: '#1e293b' } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

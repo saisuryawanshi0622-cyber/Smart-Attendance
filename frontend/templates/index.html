@@ -1,0 +1,174 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 class="page-title">Live Monitor</h1>
+
+    <div class="controls" style="display: flex; gap: 10px;">
+        <select id="subject-select" class="form-control" style="width: auto;">
+            <option value="General">General</option>
+            <option value="Seminar">Seminar</option>
+        </select>
+        <button id="start-btn" class="btn btn-success" onclick="startClass()">Start Class</button>
+        <button id="end-btn" class="btn btn-danger" onclick="endClass()" style="display: none;">End Class</button>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="left-panel">
+        <div class="card video-container">
+            <img id="video-feed" src="/api/live_feed" alt="Camera Feed">
+        </div>
+
+        <div class="card" style="display: flex; justify-content: space-between; text-align: center;">
+            <div>
+                <h3>Timer</h3>
+                <div id="timer" class="timer-display">00:00</div>
+            </div>
+            <div>
+                <h3>Status</h3>
+                <div id="status-text" style="color: var(--warning); font-size: 20px; margin-top: 10px;">Waiting...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="card">
+            <h3>Currently Live Detected</h3>
+            <div id="students-panel" class="alerts-panel"
+                style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; min-height: 50px;">
+                <div style="color: var(--text-secondary); text-align: center; width: 100%;">No students detected yet
+                </div>
+            </div>
+
+            <h3 style="margin-top: 20px;">IN Section (Checked In)</h3>
+            <div id="in-panel" class="alerts-panel"
+                style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; min-height: 50px;">
+                <div style="color: var(--text-secondary); text-align: center; width: 100%;">No check-ins yet</div>
+            </div>
+
+            <h3 style="margin-top: 20px;">OUT Section (Checked Out)</h3>
+            <div id="out-panel" class="alerts-panel"
+                style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; min-height: 50px;">
+                <div style="color: var(--text-secondary); text-align: center; width: 100%;">No check-outs yet</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let timerInterval;
+
+    function updateAlerts() {
+        fetch('/api/alerts')
+            .then(res => res.json())
+            .then(data => {
+                // Update Detected Students
+                const panel = document.getElementById('students-panel');
+                panel.innerHTML = '';
+
+                if (!data.present_students || data.present_students.length === 0) {
+                    panel.innerHTML = '<div style="color: var(--text-secondary); text-align: center; width: 100%;">No students detected yet</div>';
+                } else {
+                    data.present_students.forEach(name => {
+                        panel.innerHTML += `
+                            <div class="student-badge" style="background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <i class="fas fa-video"></i> ${name}
+                            </div>
+                        `;
+                    });
+                }
+
+                // Update IN Section
+                const inPanel = document.getElementById('in-panel');
+                inPanel.innerHTML = '';
+                if (!data.checked_in || data.checked_in.length === 0) {
+                    inPanel.innerHTML = '<div style="color: var(--text-secondary); text-align: center; width: 100%;">No check-ins yet</div>';
+                } else {
+                    data.checked_in.forEach(name => {
+                        inPanel.innerHTML += `
+                            <div class="student-badge" style="background: var(--success); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <i class="fas fa-sign-in-alt"></i> ${name}
+                            </div>
+                        `;
+                    });
+                }
+
+                // Update OUT Section
+                const outPanel = document.getElementById('out-panel');
+                outPanel.innerHTML = '';
+                if (!data.checked_out || data.checked_out.length === 0) {
+                    outPanel.innerHTML = '<div style="color: var(--text-secondary); text-align: center; width: 100%;">No check-outs yet</div>';
+                } else {
+                    data.checked_out.forEach(name => {
+                        outPanel.innerHTML += `
+                            <div class="student-badge" style="background: var(--danger); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <i class="fas fa-sign-out-alt"></i> ${name}
+                            </div>
+                        `;
+                    });
+                }
+
+                // Update Timer
+                if (data.is_active) {
+                    wasClassActive = true;
+                    let mins = Math.floor(data.timer / 60);
+                    let secs = Math.floor(data.timer % 60);
+                    document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    document.getElementById('start-btn').style.display = 'none';
+                    document.getElementById('end-btn').style.display = 'inline-block';
+                    document.getElementById('status-text').innerText = 'Class in Progress';
+                    document.getElementById('status-text').style.color = 'var(--success)';
+                } else {
+                    if (wasClassActive) {
+                        alert('attendance is marks for all studant');
+                        wasClassActive = false;
+                    }
+                    document.getElementById('start-btn').style.display = 'inline-block';
+                    document.getElementById('end-btn').style.display = 'none';
+                    document.getElementById('status-text').innerText = 'Waiting...';
+                    document.getElementById('status-text').style.color = 'var(--warning)';
+                    document.getElementById('timer').innerText = '00:00';
+                }
+            });
+    }
+
+    function startClass() {
+        const subject = document.getElementById('subject-select').value;
+        fetch('/api/start_class', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ duration: 60, subject: subject })
+        }).then(() => {
+            updateAlerts();
+            // Force browser to reconnect to video stream
+            document.getElementById('video-feed').src = '/api/live_feed?' + new Date().getTime();
+        });
+    }
+
+    function endClass() {
+        if (confirm("Are you sure you want to end the class?")) {
+            fetch('/api/end_class', { method: 'POST' })
+                .then(() => {
+                    alert("Class ended. Attendance marked.");
+                    updateAlerts();
+                });
+        }
+    }
+
+    setInterval(updateAlerts, 2000);
+
+    // Handle Safari Back-Forward Cache (BF-cache) and page reloads
+    window.addEventListener('pageshow', function () {
+        document.getElementById('video-feed').src = '/api/live_feed?' + new Date().getTime();
+    });
+
+    // Extremely important for Safari: kill the stream connection before navigating away
+    // Otherwise, Safari keeps the connection open in the background, hitting the connection limit!
+    window.addEventListener('beforeunload', function () {
+        document.getElementById('video-feed').src = '';
+    });
+</script>
+{% endblock %}

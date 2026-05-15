@@ -1,0 +1,160 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 class="page-title">Attendance Dashboard (Today)</h1>
+
+    <div>
+        <button type="submit" form="batchDeleteForm" class="btn btn-warning"
+            style="background-color: #f39c12; border-color: #f39c12; margin-right: 5px;"
+            onclick="return confirm('Are you sure you want to delete the selected records?');"><i
+                class="fas fa-trash-alt"></i> Delete Selected</button>
+        <form action="/clear_today_attendance" method="POST" style="display:inline;"
+            onsubmit="return confirm('Are you sure you want to clear all attendance records for today?');">
+            <button type="submit" class="btn btn-danger" style="background-color: #e74c3c; border-color: #e74c3c;"><i
+                    class="fas fa-trash"></i> Clear Today's Records</button>
+        </form>
+        <form action="/api/export_pdf" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download PDF</button>
+        </form>
+        <form action="/api/export_excel" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Download Excel</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <input type="text" id="searchInput" placeholder="Search by name..." style="max-width: 300px;"
+            onkeyup="filterTable()">
+
+        <select id="subjectFilter" style="max-width: 200px;" onchange="filterTable()">
+            <option value="All">All Subjects</option>
+            {% for subj in subjects %}
+            <option value="{{ subj }}">{{ subj }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="statusFilter" style="max-width: 200px;" onchange="filterTable()">
+            <option value="All">All Statuses</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+        </select>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <form action="/delete_selected" method="POST" id="batchDeleteForm" style="display: none;"></form>
+        <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll"
+                                onclick="toggleAllCheckboxes(this)"></th>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Roll No</th>
+                        <th class="s-subject-head">Subject</th>
+                        <th>Status</th>
+                        <th>Arrival Time</th>
+                        <th>Presence %</th>
+                        <th>Behaviour Score</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" name="record_ids" value="{{ record.id }}" class="record-checkbox" form="batchDeleteForm">
+                        </td>
+                        <td>
+                            {% if record.photo_path %}
+                            <img src="/{{ record.photo_path }}" alt="Photo"
+                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            {% else %}
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #555;"></div>
+                            {% endif %}
+                        </td>
+                        <td class="s-name">{{ record.name }}</td>
+                        <td>{{ record.roll_number }}</td>
+                        <td class="s-subject">{{ record.subject }}</td>
+                        <td class="s-status">
+                            {% if record.status == 'Present' %}
+                            <span class="badge badge-present">Present</span>
+                            {% elif record.status == 'Absent' %}
+                            <span class="badge badge-absent">Absent</span>
+                            {% else %}
+                            <span class="badge badge-late">Late</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ record.arrival_time }}</td>
+                        <td>{{ "%.1f"|format(record.presence_percentage) }}%</td>
+                        <td>{{ record.behaviour_score }}</td>
+                        <td>
+                            <form action="/delete_record/{{ record.id }}" method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this record?');"
+                                style="margin: 0;">
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                    style="padding: 5px 10px; font-size: 12px; background-color: #e74c3c; border: none; color: white; border-radius: 4px; cursor: pointer;"><i
+                                        class="fas fa-trash"></i> Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" style="text-align: center;">No attendance records for today.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterTable() {
+        var input, filterName, filterStatus, filterSubject, table, tr, i;
+        input = document.getElementById("searchInput");
+        filterName = input.value.toUpperCase();
+        filterStatus = document.getElementById("statusFilter").value;
+        filterSubject = document.getElementById("subjectFilter").value;
+        table = document.getElementById("attendanceTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 1; i < tr.length; i++) {
+            var tdName = tr[i].querySelector(".s-name");
+            var tdStatus = tr[i].querySelector(".s-status");
+            var tdSubject = tr[i].querySelector(".s-subject");
+
+            if (tdName && tdStatus && tdSubject) {
+                var txtValueName = tdName.textContent || tdName.innerText;
+                var txtValueStatus = tdStatus.textContent || tdStatus.innerText;
+                var txtValueSubject = tdSubject.textContent || tdSubject.innerText;
+
+                var matchName = txtValueName.toUpperCase().indexOf(filterName) > -1;
+                var matchStatus = (filterStatus === "All") || (txtValueStatus.trim() === filterStatus);
+                var matchSubject = (filterSubject === "All") || (txtValueSubject.trim() === filterSubject);
+
+                if (matchName && matchStatus && matchSubject) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+<script>
+    function toggleAllCheckboxes(source) {
+        checkboxes = document.querySelectorAll('.record-checkbox');
+        for (var i = 0, n = checkboxes.length; i < n; i++) {
+            // Only toggle visible rows
+            if (checkboxes[i].closest('tr').style.display !== "none") {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+    }
+
+    // Intercept form submission to ensure only visible checked boxes are sent, or just let all checked boxes be sent
+</script>
+{% endblock %}
