@@ -37,9 +37,19 @@ def login_required(f):
 # Initialize engines
 print("Initializing Engines...")
 database.init_db()
-face_engine = FaceEngine()
+face_engine = None
+try:
+    face_engine = FaceEngine()
+    print("Face Engine Loaded")
+except Exception as e:
+    print(f"Face Engine Error: {e}")
 behaviour_engine = BehaviourEngine()
-voice_system = VoiceAlertSystem()
+voice_system = None
+try:
+    voice_system = VoiceAlertSystem()
+    print("Voice System Loaded")
+except Exception as e:
+    print(f"Voice System Error: {e}")
 attendance_engine = AttendanceEngine()
 
 # Global state for streaming
