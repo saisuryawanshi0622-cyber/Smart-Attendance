@@ -69,7 +69,11 @@ def process_camera():
         if camera_requested and (cap is None or not cap.isOpened()):
             os.environ["OPENCV_AVFOUNDATION_SKIP_AUTH"] = "1"
             print("Turning ON physical camera...")
-            cap = cv2.VideoCapture(0)
+            try:
+                cap = cv2.VideoCapture(0)
+            except Exception as e:
+                print(f"Camera Error: {e}")
+                cap = None
             if cap is None or not cap.isOpened():
                 print("Failed to open physical camera (cloud environment).")
                 cap = None

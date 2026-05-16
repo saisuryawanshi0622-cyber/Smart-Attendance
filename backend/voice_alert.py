@@ -22,8 +22,11 @@ class VoiceAlertSystem:
                 
             try:
                 alert = self.alert_queue.get(timeout=1)
-                # Use native Mac 'say' command which is extremely reliable
-                os.system(f'say "{alert}" &')
+                import sys
+                if sys.platform == "darwin":
+                    os.system(f'say "{alert}" &')
+                else:
+                    print(f"Voice Alert: {alert}")
                 self.alert_queue.task_done()
             except queue.Empty:
                 pass
